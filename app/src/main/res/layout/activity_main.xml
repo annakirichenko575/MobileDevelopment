@@ -24,12 +24,6 @@
         android:layout_height="wrap_content"
         android:text="Показать одно избранное" />
 
-    <Button
-        android:id="@+id/buttonOpenFavorite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Открыть избранное" />
-
     <TextView
         android:id="@+id/textViewPlant"
         android:layout_width="match_parent"

@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
 
         Button btnSave = findViewById(R.id.buttonSavePlant);
         Button btnGet = findViewById(R.id.buttonGetPlant);
-        Button btnOpenFavorite = findViewById(R.id.buttonOpenFavorite);
 
         // сохранить растение в избранное
         btnSave.setOnClickListener(v -> {
@@ -49,12 +48,6 @@ public class MainActivity extends AppCompatActivity {
         btnGet.setOnClickListener(v -> {
             Plant plant = plantRepository.getFavoritePlant();
             textView.setText("Favorite plant: " + plant.getName());
-        });
-
-        // открыть экран "Избранное"
-        btnOpenFavorite.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
-            startActivity(intent);
         });
     }
 }
