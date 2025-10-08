@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import ru.mirea.kirichenkoal.lesson9.R;
 import ru.mirea.kirichenkoal.lesson9.data.repository.PlantRepositoryImpl;
@@ -39,13 +40,36 @@ public class FavoriteActivity extends AppCompatActivity {
         removeUseCase = new RemovePlantsFromFavorityByID(repo);
 
         loadAndShow();
+
+        // === Кнопка "Назад" ===
+        Button buttonBack = findViewById(R.id.buttonBackToMain);
+        buttonBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish(); // закрываем FavoriteActivity и возвращаемся на MainActivity
+            }
+        });
     }
 
     private void loadAndShow() {
-        items = getFavUseCase.execute(100, 0);
-        FavoriteAdapter adapter = new FavoriteAdapter();
-        listView.setAdapter(adapter);
+        repo.getFavoritePlantsFromDatabase(new PlantRepositoryImpl.PlantDatabaseCallback() {
+            @Override
+            public void onSuccess(List<Plant> plants) {
+                items = plants;
+                if (items == null) {
+                    items = new ArrayList<>();
+                }
+                FavoriteAdapter adapter = new FavoriteAdapter();
+                listView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onError(String error) {
+                items = new ArrayList<>();
+            }
+        });
     }
+
 
     private class FavoriteAdapter extends BaseAdapter {
         @Override public int getCount() { return items.size(); }
