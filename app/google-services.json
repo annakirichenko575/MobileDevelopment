@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "506440971469",
+    "project_id": "plant-e91c0",
+    "storage_bucket": "plant-e91c0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:506440971469:android:2f78630bd3b61a2353e584",
+        "android_client_info": {
+          "package_name": "ru.mirea.kirichenkoal.lesson9"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMAcD7kC9_hmEjoLsLJZkBW2vBoAzP_LI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
