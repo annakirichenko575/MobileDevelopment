@@ -19,24 +19,25 @@
             app:title="Избранные растения"
             app:titleTextColor="@color/black"
             app:navigationIcon="@drawable/ic_favorite"
-            app:navigationContentDescription="Назад"
-            app:menu="@menu/main_menu" />
+            app:navigationContentDescription="Избранное" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Основной блок контента -->
+    <!-- Основной контент -->
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/contentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="552dp"
         android:layout_margin="20dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:layout_marginTop="80dp"
+        android:layout_marginBottom="80dp"
+        app:cardBackgroundColor="@color/white"
         app:cardCornerRadius="24dp"
         app:cardElevation="8dp"
-        app:cardBackgroundColor="@color/white"
-        android:layout_marginTop="80dp">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="563dp"
             android:orientation="vertical"
             android:padding="24dp">
 
@@ -45,49 +46,46 @@
                 android:id="@+id/textFavoritesTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:gravity="center"
                 android:text="Мои избранные растения"
                 android:textColor="@color/black"
                 android:textSize="22sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginBottom="12dp" />
+                android:textStyle="bold" />
 
             <!-- Подзаголовок -->
             <TextView
                 android:id="@+id/textFavoritesHint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:gravity="center"
                 android:text="Здесь отображаются растения, добавленные в избранное"
                 android:textColor="@color/gray_600"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:layout_marginBottom="16dp" />
+                android:textSize="14sp" />
 
             <!-- Список избранных -->
             <ListView
                 android:id="@+id/listViewFavorites"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="416dp"
                 android:divider="@color/gray_300"
                 android:dividerHeight="1dp" />
 
-            <!-- Кнопка возврата -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonBackToMain"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:text="Вернуться"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:cornerRadius="16dp"
-                app:icon="@drawable/ic_arrow_back"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp"
-                app:iconTint="@color/white"
-                android:backgroundTint="@color/green_500"
-                style="@style/Widget.Material3.Button" />
-
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
+
+    <!-- Нижнее меню (фиксируется у низа экрана) -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@android:color/white"
+        app:itemIconSize="28dp"
+        app:itemIconTint="@color/green_primary"
+        app:itemRippleColor="@android:color/darker_gray"
+        app:labelVisibilityMode="unlabeled"
+        app:menu="@menu/bottom_nav_menu" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

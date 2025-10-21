@@ -1,5 +1,6 @@
 package ru.mirea.kirichenkoal.lesson9.presentation;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -9,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -34,7 +36,7 @@ public class SearchActivity extends AppCompatActivity {
 
     private PlantAdapter adapter;
 
-    // Добавляем ViewModel
+    // ViewModel
     private PlantViewModel viewModel;
 
     @Override
@@ -45,6 +47,7 @@ public class SearchActivity extends AppCompatActivity {
         initViews();
         setupViewModel();
         setupClickListeners();
+        setupBottomNavigation(); // нижнее меню
     }
 
     private void initViews() {
@@ -64,12 +67,11 @@ public class SearchActivity extends AppCompatActivity {
      * Настройка ViewModel и LiveData
      */
     private void setupViewModel() {
-        // создаём репозиторий и ViewModel через фабрику
         PlantRepositoryImpl repo = new PlantRepositoryImpl(this);
         PlantViewModelFactory factory = new PlantViewModelFactory(repo);
         viewModel = new ViewModelProvider(this, factory).get(PlantViewModel.class);
 
-        // Подписка на обновления LiveData
+        // Подписка на LiveData
         viewModel.getPlants().observe(this, plants -> {
             setLoading(false);
             if (plants != null) {
@@ -85,7 +87,7 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     /**
-     * Метод поиска — теперь работает через ViewModel, а не напрямую через UseCase.
+     * Поиск через ViewModel
      */
     private void performSearch() {
         String query = etSearch.getText().toString().trim();
@@ -96,8 +98,6 @@ public class SearchActivity extends AppCompatActivity {
 
         setLoading(true);
         hideResults();
-
-        // ViewModel вызывает репозиторий и обновляет LiveData
         viewModel.loadFromNetwork(query);
     }
 
@@ -132,5 +132,35 @@ public class SearchActivity extends AppCompatActivity {
         tvResultsTitle.setVisibility(View.GONE);
         recyclerViewResults.setVisibility(View.GONE);
         tvNoResults.setVisibility(View.GONE);
+    }
+
+    /**
+     * Нижнее меню навигации с if-else (без switch)
+     */
+    private void setupBottomNavigation() {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
+        bottomNavigationView.setSelectedItemId(R.id.navigation_search);
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.navigation_home) {
+                startActivity(new Intent(this, MainActivity.class));
+                return true;
+            } else if (id == R.id.navigation_search) {
+                return true; // уже здесь
+            } else if (id == R.id.navigation_analyze) {
+                Toast.makeText(this, "Функция анализа листа пока не реализована", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (id == R.id.navigation_favorite) {
+                startActivity(new Intent(this, FavoriteActivity.class));
+                return true;
+            } else if (id == R.id.navigation_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                return true;
+            }
+
+            return false;
+        });
     }
 }

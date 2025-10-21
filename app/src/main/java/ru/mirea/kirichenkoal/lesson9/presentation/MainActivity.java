@@ -13,6 +13,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import ru.mirea.kirichenkoal.lesson9.R;
 import ru.mirea.kirichenkoal.lesson9.data.repository.PlantRepositoryImpl;
 import ru.mirea.kirichenkoal.lesson9.domain.models.Plant;
@@ -43,6 +45,30 @@ public class MainActivity extends AppCompatActivity {
         initViews();
         setupViewModel();
         setupClickListeners();
+
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
+        bottomNavigationView.setSelectedItemId(R.id.navigation_home);
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.navigation_home) {
+                return true; // уже здесь
+            } else if (id == R.id.navigation_search) {
+                startActivity(new Intent(this, SearchActivity.class));
+                return true;
+            } else if (id == R.id.navigation_analyze) {
+                Toast.makeText(this, "Функция анализа листа пока не реализована", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (id == R.id.navigation_favorite) {
+                startActivity(new Intent(this, FavoriteActivity.class));
+                return true;
+            } else if (id == R.id.navigation_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                return true;
+            }
+            return false;
+        });
     }
 
     private void initViews() {
@@ -98,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getFavoritePlant() {
-        // теперь просто загружаем из базы — результат придёт через LiveData
+        //загружаем из базы — результат придёт через LiveData
         plantViewModel.loadFromDatabase();
     }
 

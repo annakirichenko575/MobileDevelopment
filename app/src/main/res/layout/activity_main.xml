@@ -18,8 +18,7 @@
             android:layout_height="?attr/actionBarSize"
             app:title="PlantCare"
             app:titleTextColor="@color/black"
-            app:navigationIcon="@drawable/ic_plant_logo"
-            app:menu="@menu/main_menu" />
+            app:navigationIcon="@drawable/ic_plant_logo" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -231,5 +230,17 @@
         android:layout_gravity="end"
         android:layout_marginTop="8dp"
         style="@style/Widget.Material3.Button.OutlinedButton" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@android:color/white"
+        app:itemIconSize="28dp"
+        app:itemIconTint="@color/green_primary"
+        app:itemRippleColor="@android:color/darker_gray"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

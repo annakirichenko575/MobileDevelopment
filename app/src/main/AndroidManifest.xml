@@ -31,8 +31,11 @@
             android:name=".presentation.FavoriteActivity"
             android:exported="false" />
 
-        <!-- ДОБАВЛЯЕМ SearchActivity -->
         <activity android:name=".presentation.SearchActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.ProfileActivity"
             android:exported="false" />
 
     </application>

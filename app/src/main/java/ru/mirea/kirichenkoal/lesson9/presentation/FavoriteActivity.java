@@ -1,5 +1,6 @@
 package ru.mirea.kirichenkoal.lesson9.presentation;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,9 +9,12 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +35,7 @@ public class FavoriteActivity extends AppCompatActivity {
     private RemovePlantsFromFavorityByID removeUseCase;
     private List<Plant> items = new ArrayList<>();
 
-    // Добавляем ViewModel
+    // ViewModel
     private PlantViewModel viewModel;
 
     @Override
@@ -41,20 +45,20 @@ public class FavoriteActivity extends AppCompatActivity {
 
         listView = findViewById(R.id.listViewFavorites);
 
-        // Создаём репозиторий
+        // Репозиторий и use case
         repo = new PlantRepositoryImpl(this);
         getFavUseCase = new GetFavorityPlantByPage(repo);
         removeUseCase = new RemovePlantsFromFavorityByID(repo);
 
-        // === Создаём ViewModel ===
+        // ViewModel
         PlantViewModelFactory factory = new PlantViewModelFactory(repo);
         viewModel = new ViewModelProvider(this, factory).get(PlantViewModel.class);
 
-        // Настраиваем адаптер
+        // Настройка адаптера
         FavoriteAdapter adapter = new FavoriteAdapter();
         listView.setAdapter(adapter);
 
-        // === Наблюдаем за LiveData ===
+        // Подписка на LiveData
         viewModel.getPlants().observe(this, plants -> {
             if (plants != null) {
                 items.clear();
@@ -63,18 +67,44 @@ public class FavoriteActivity extends AppCompatActivity {
             }
         });
 
-        // === Загружаем данные из БД через ViewModel ===
+        // Загрузка данных
         viewModel.loadFromDatabase();
 
-        // === Кнопка "Назад" ===
-        Button buttonBack = findViewById(R.id.buttonBackToMain);
-        buttonBack.setOnClickListener(v -> finish());
+        // === Нижнее меню ===
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
+        bottomNavigationView.setSelectedItemId(R.id.navigation_favorite);
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.navigation_home) {
+                startActivity(new Intent(this, MainActivity.class));
+                return true;
+            } else if (id == R.id.navigation_search) {
+                startActivity(new Intent(this, SearchActivity.class));
+                return true;
+            } else if (id == R.id.navigation_analyze) {
+                Toast.makeText(this, "Функция анализа листа пока не реализована", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (id == R.id.navigation_favorite) {
+                return true; // уже здесь
+            } else if (id == R.id.navigation_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                return true;
+            }
+            return false;
+        });
     }
 
     private class FavoriteAdapter extends BaseAdapter {
-        @Override public int getCount() { return items.size(); }
-        @Override public Object getItem(int i) { return items.get(i); }
-        @Override public long getItemId(int i) { return items.get(i).getId(); }
+        @Override
+        public int getCount() { return items.size(); }
+
+        @Override
+        public Object getItem(int i) { return items.get(i); }
+
+        @Override
+        public long getItemId(int i) { return items.get(i).getId(); }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -82,14 +112,16 @@ public class FavoriteActivity extends AppCompatActivity {
                 convertView = LayoutInflater.from(FavoriteActivity.this)
                         .inflate(R.layout.favorite_item, parent, false);
             }
+
             TextView tvName = convertView.findViewById(R.id.textPlantName);
             Button btnRemove = convertView.findViewById(R.id.buttonRemove);
 
             Plant plant = items.get(position);
             tvName.setText(plant.getName());
+
             btnRemove.setOnClickListener(v -> {
                 removeUseCase.execute(String.valueOf(plant.getId()));
-                viewModel.loadFromDatabase(); // обновляем список через ViewModel
+                viewModel.loadFromDatabase();
             });
 
             return convertView;
