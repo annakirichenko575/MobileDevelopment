@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,9 +17,13 @@ import java.util.List;
 import ru.mirea.kirichenkoal.lesson9.R;
 import ru.mirea.kirichenkoal.lesson9.data.repository.PlantRepositoryImpl;
 import ru.mirea.kirichenkoal.lesson9.domain.models.Plant;
-import ru.mirea.kirichenkoal.lesson9.domain.repository.PlantRepository;
-import ru.mirea.kirichenkoal.lesson9.domain.usecases.SearchPlantsUseCase;
+import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.PlantViewModel;
+import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.PlantViewModelFactory;
 
+/**
+ * Экран поиска растений.
+ * MVVM — взаимодействует с ViewModel через LiveData.
+ */
 public class SearchActivity extends AppCompatActivity {
 
     private TextInputEditText etSearch;
@@ -28,8 +33,9 @@ public class SearchActivity extends AppCompatActivity {
     private View tvResultsTitle, tvNoResults;
 
     private PlantAdapter adapter;
-    private PlantRepository plantRepository;
-    private SearchPlantsUseCase searchUseCase;
+
+    // Добавляем ViewModel
+    private PlantViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +43,7 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
 
         initViews();
-        setupDependencies();
+        setupViewModel();
         setupClickListeners();
     }
 
@@ -54,18 +60,35 @@ public class SearchActivity extends AppCompatActivity {
         recyclerViewResults.setAdapter(adapter);
     }
 
-    private void setupDependencies() {
-        plantRepository = new PlantRepositoryImpl(this);
-        searchUseCase = new SearchPlantsUseCase(plantRepository);
+    /**
+     * Настройка ViewModel и LiveData
+     */
+    private void setupViewModel() {
+        // создаём репозиторий и ViewModel через фабрику
+        PlantRepositoryImpl repo = new PlantRepositoryImpl(this);
+        PlantViewModelFactory factory = new PlantViewModelFactory(repo);
+        viewModel = new ViewModelProvider(this, factory).get(PlantViewModel.class);
+
+        // Подписка на обновления LiveData
+        viewModel.getPlants().observe(this, plants -> {
+            setLoading(false);
+            if (plants != null) {
+                displayResults(plants);
+            } else {
+                showNoResults();
+            }
+        });
     }
 
     private void setupClickListeners() {
         btnSearch.setOnClickListener(v -> performSearch());
     }
 
+    /**
+     * Метод поиска — теперь работает через ViewModel, а не напрямую через UseCase.
+     */
     private void performSearch() {
         String query = etSearch.getText().toString().trim();
-
         if (query.isEmpty()) {
             Toast.makeText(this, "Введите поисковый запрос", Toast.LENGTH_SHORT).show();
             return;
@@ -74,24 +97,8 @@ public class SearchActivity extends AppCompatActivity {
         setLoading(true);
         hideResults();
 
-        searchUseCase.execute(query, new PlantRepository.PlantSearchCallback() {
-            @Override
-            public void onSuccess(List<Plant> plants) {
-                runOnUiThread(() -> {
-                    setLoading(false);
-                    displayResults(plants);
-                });
-            }
-
-            @Override
-            public void onError(String message) {
-                runOnUiThread(() -> {
-                    setLoading(false);
-                    Toast.makeText(SearchActivity.this, message, Toast.LENGTH_LONG).show();
-                    showNoResults();
-                });
-            }
-        });
+        // ViewModel вызывает репозиторий и обновляет LiveData
+        viewModel.loadFromNetwork(query);
     }
 
     private void setLoading(boolean loading) {

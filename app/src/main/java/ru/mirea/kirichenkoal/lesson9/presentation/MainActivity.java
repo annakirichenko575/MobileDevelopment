@@ -8,6 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -15,34 +16,52 @@ import com.google.firebase.auth.FirebaseUser;
 import ru.mirea.kirichenkoal.lesson9.R;
 import ru.mirea.kirichenkoal.lesson9.data.repository.PlantRepositoryImpl;
 import ru.mirea.kirichenkoal.lesson9.domain.models.Plant;
-import ru.mirea.kirichenkoal.lesson9.domain.repository.PlantRepository;
 import ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthActivity;
+import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.PlantViewModel;
+import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.PlantViewModelFactory;
 
+/**
+ * Главный экран приложения — теперь также работает через ViewModel.
+ */
 public class MainActivity extends AppCompatActivity {
 
-    private PlantRepository plantRepository;
     private EditText editText;
     private TextView textView;
     private FirebaseAuth firebaseAuth;
+
+    // Добавляем ViewModel
+    private PlantViewModel plantViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Инициализируем Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance();
-
         checkAuthentication();
 
-        plantRepository = new PlantRepositoryImpl(this);
         initViews();
+        setupViewModel();
         setupClickListeners();
     }
 
     private void initViews() {
         editText = findViewById(R.id.editTextPlant);
         textView = findViewById(R.id.textViewPlant);
+    }
+
+    private void setupViewModel() {
+        PlantRepositoryImpl repo = new PlantRepositoryImpl(this);
+        PlantViewModelFactory factory = new PlantViewModelFactory(repo);
+        plantViewModel = new ViewModelProvider(this, factory).get(PlantViewModel.class);
+
+        // Подписываемся на LiveData
+        plantViewModel.getPlants().observe(this, plants -> {
+            if (plants != null && !plants.isEmpty()) {
+                Plant lastPlant = plants.get(plants.size() - 1);
+                textView.setText("Ваше растение: " + lastPlant.getName());
+            }
+        });
     }
 
     private void setupClickListeners() {
@@ -53,12 +72,7 @@ public class MainActivity extends AppCompatActivity {
         btnGet.setOnClickListener(v -> getFavoritePlant());
 
         findViewById(R.id.buttonSearch).setOnClickListener(v -> openSearch());
-        findViewById(R.id.buttonFavorites).setOnClickListener(v -> {
-            Intent intent = new Intent(this, FavoriteActivity.class);
-            startActivity(intent);
-        });
-
-        // Кнопка выхода
+        findViewById(R.id.buttonFavorites).setOnClickListener(v -> openFavorites());
         findViewById(R.id.buttonLogout).setOnClickListener(v -> logout());
     }
 
@@ -68,14 +82,24 @@ public class MainActivity extends AppCompatActivity {
             textView.setText("Введите название растения");
             return;
         }
-        boolean result = plantRepository.savePlant(new Plant(1, name));
-        textView.setText("Сохранено: " + name);
-        editText.setText("");
+
+        // сохраняем через репозиторий напрямую (ViewModel может остаться без save, если нет use case)
+        PlantRepositoryImpl repo = new PlantRepositoryImpl(this);
+        boolean result = repo.savePlant(new Plant(1, name));
+
+        if (result) {
+            Toast.makeText(this, "Сохранено: " + name, Toast.LENGTH_SHORT).show();
+            editText.setText("");
+            // обновляем данные из базы, чтобы отразились в LiveData
+            plantViewModel.loadFromDatabase();
+        } else {
+            Toast.makeText(this, "Ошибка при сохранении", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void getFavoritePlant() {
-        Plant plant = plantRepository.getFavoritePlant();
-        textView.setText("Ваше растение: " + plant.getName());
+        // теперь просто загружаем из базы — результат придёт через LiveData
+        plantViewModel.loadFromDatabase();
     }
 
     private void openSearch() {
@@ -97,12 +121,10 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
 
         if (currentUser == null) {
-            // Пользователь не авторизован - переходим на AuthActivity
             Intent intent = new Intent(this, AuthActivity.class);
             startActivity(intent);
             finish();
         } else {
-            // Пользователь авторизован
             String userName = currentUser.getDisplayName();
             String userEmail = currentUser.getEmail();
             if (userName != null && !userName.isEmpty()) {

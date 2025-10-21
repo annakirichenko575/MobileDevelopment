@@ -10,15 +10,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import ru.mirea.kirichenkoal.lesson9.R;
 import ru.mirea.kirichenkoal.lesson9.data.repository.PlantRepositoryImpl;
 import ru.mirea.kirichenkoal.lesson9.domain.models.Plant;
 import ru.mirea.kirichenkoal.lesson9.domain.usecases.GetFavorityPlantByPage;
 import ru.mirea.kirichenkoal.lesson9.domain.usecases.RemovePlantsFromFavorityByID;
+import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.PlantViewModel;
+import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.PlantViewModelFactory;
 
 public class FavoriteActivity extends AppCompatActivity {
 
@@ -26,7 +29,10 @@ public class FavoriteActivity extends AppCompatActivity {
     private PlantRepositoryImpl repo;
     private GetFavorityPlantByPage getFavUseCase;
     private RemovePlantsFromFavorityByID removeUseCase;
-    private List<Plant> items;
+    private List<Plant> items = new ArrayList<>();
+
+    // Добавляем ViewModel
+    private PlantViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,41 +41,35 @@ public class FavoriteActivity extends AppCompatActivity {
 
         listView = findViewById(R.id.listViewFavorites);
 
+        // Создаём репозиторий
         repo = new PlantRepositoryImpl(this);
         getFavUseCase = new GetFavorityPlantByPage(repo);
         removeUseCase = new RemovePlantsFromFavorityByID(repo);
 
-        loadAndShow();
+        // === Создаём ViewModel ===
+        PlantViewModelFactory factory = new PlantViewModelFactory(repo);
+        viewModel = new ViewModelProvider(this, factory).get(PlantViewModel.class);
+
+        // Настраиваем адаптер
+        FavoriteAdapter adapter = new FavoriteAdapter();
+        listView.setAdapter(adapter);
+
+        // === Наблюдаем за LiveData ===
+        viewModel.getPlants().observe(this, plants -> {
+            if (plants != null) {
+                items.clear();
+                items.addAll(plants);
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        // === Загружаем данные из БД через ViewModel ===
+        viewModel.loadFromDatabase();
 
         // === Кнопка "Назад" ===
         Button buttonBack = findViewById(R.id.buttonBackToMain);
-        buttonBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish(); // закрываем FavoriteActivity и возвращаемся на MainActivity
-            }
-        });
+        buttonBack.setOnClickListener(v -> finish());
     }
-
-    private void loadAndShow() {
-        repo.getFavoritePlantsFromDatabase(new PlantRepositoryImpl.PlantDatabaseCallback() {
-            @Override
-            public void onSuccess(List<Plant> plants) {
-                items = plants;
-                if (items == null) {
-                    items = new ArrayList<>();
-                }
-                FavoriteAdapter adapter = new FavoriteAdapter();
-                listView.setAdapter(adapter);
-            }
-
-            @Override
-            public void onError(String error) {
-                items = new ArrayList<>();
-            }
-        });
-    }
-
 
     private class FavoriteAdapter extends BaseAdapter {
         @Override public int getCount() { return items.size(); }
@@ -87,12 +87,9 @@ public class FavoriteActivity extends AppCompatActivity {
 
             Plant plant = items.get(position);
             tvName.setText(plant.getName());
-            btnRemove.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    removeUseCase.execute(String.valueOf(plant.getId()));
-                    loadAndShow();
-                }
+            btnRemove.setOnClickListener(v -> {
+                removeUseCase.execute(String.valueOf(plant.getId()));
+                viewModel.loadFromDatabase(); // обновляем список через ViewModel
             });
 
             return convertView;

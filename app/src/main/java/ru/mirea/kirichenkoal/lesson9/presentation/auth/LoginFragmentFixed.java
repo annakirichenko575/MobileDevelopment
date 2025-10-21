@@ -64,7 +64,6 @@ public class LoginFragmentFixed extends Fragment {
         btnLogin.setOnClickListener(v -> attemptLogin());
 
         btnGuest.setOnClickListener(v -> {
-            // ПРОСТОЙ INTENT БЕЗ NAVIGATION
             Intent intent = new Intent(requireActivity(), MainActivity.class);
             startActivity(intent);
             requireActivity().finish();
