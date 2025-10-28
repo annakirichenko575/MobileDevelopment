@@ -2,75 +2,65 @@ package ru.mirea.kirichenkoal.lesson9.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import ru.mirea.kirichenkoal.lesson9.R;
-import ru.mirea.kirichenkoal.lesson9.data.repository.PlantRepositoryImpl;
-import ru.mirea.kirichenkoal.lesson9.domain.models.Plant;
-import ru.mirea.kirichenkoal.lesson9.domain.usecases.GetFavorityPlantByPage;
-import ru.mirea.kirichenkoal.lesson9.domain.usecases.RemovePlantsFromFavorityByID;
-import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.PlantViewModel;
-import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.PlantViewModelFactory;
+import ru.mirea.kirichenkoal.lesson9.domain.models.PlantItem;
+import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.FavoritePlantsViewModel;
 
+/**
+ * Экран "Избранное"
+ * Отображает растения, добавленные в избранное из общего MockPlantRepository.
+ */
 public class FavoriteActivity extends AppCompatActivity {
 
-    private ListView listView;
-    private PlantRepositoryImpl repo;
-    private GetFavorityPlantByPage getFavUseCase;
-    private RemovePlantsFromFavorityByID removeUseCase;
-    private List<Plant> items = new ArrayList<>();
-
-    // ViewModel
-    private PlantViewModel viewModel;
+    private FavoritePlantsViewModel viewModel;
+    private PlantListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite);
 
-        listView = findViewById(R.id.listViewFavorites);
+        setupRecyclerView();
+        setupViewModel();
+        setupBottomNavigation();
+    }
 
-        // Репозиторий и use case
-        repo = new PlantRepositoryImpl(this);
-        getFavUseCase = new GetFavorityPlantByPage(repo);
-        removeUseCase = new RemovePlantsFromFavorityByID(repo);
+    private void setupRecyclerView() {
+        RecyclerView recyclerView = findViewById(R.id.recyclerViewFavorites);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new PlantListAdapter();
+        recyclerView.setAdapter(adapter);
 
-        // ViewModel
-        PlantViewModelFactory factory = new PlantViewModelFactory(repo);
-        viewModel = new ViewModelProvider(this, factory).get(PlantViewModel.class);
+        // кнопка избранного в этом списке неактивна
+        adapter.setOnFavoriteClickListener(plant ->
+                Toast.makeText(this, "Избранное редактируется на главной странице", Toast.LENGTH_SHORT).show());
+    }
 
-        // Настройка адаптера
-        FavoriteAdapter adapter = new FavoriteAdapter();
-        listView.setAdapter(adapter);
+    private void setupViewModel() {
+        viewModel = new ViewModelProvider(this).get(FavoritePlantsViewModel.class);
+        viewModel.getFavorites().observe(this, this::displayFavorites);
+    }
 
-        // Подписка на LiveData
-        viewModel.getPlants().observe(this, plants -> {
-            if (plants != null) {
-                items.clear();
-                items.addAll(plants);
-                adapter.notifyDataSetChanged();
-            }
-        });
+    private void displayFavorites(List<PlantItem> plants) {
+        if (plants == null || plants.isEmpty()) {
+            Toast.makeText(this, "Нет избранных растений", Toast.LENGTH_SHORT).show();
+        } else {
+            adapter.setPlants(plants);
+        }
+    }
 
-        // Загрузка данных
-        viewModel.loadFromDatabase();
-
-        // === Нижнее меню ===
+    private void setupBottomNavigation() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
         bottomNavigationView.setSelectedItemId(R.id.navigation_favorite);
 
@@ -79,9 +69,11 @@ public class FavoriteActivity extends AppCompatActivity {
 
             if (id == R.id.navigation_home) {
                 startActivity(new Intent(this, MainActivity.class));
+                overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.navigation_search) {
                 startActivity(new Intent(this, SearchActivity.class));
+                overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.navigation_analyze) {
                 Toast.makeText(this, "Функция анализа листа пока не реализована", Toast.LENGTH_SHORT).show();
@@ -90,41 +82,11 @@ public class FavoriteActivity extends AppCompatActivity {
                 return true; // уже здесь
             } else if (id == R.id.navigation_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
                 return true;
             }
+
             return false;
         });
-    }
-
-    private class FavoriteAdapter extends BaseAdapter {
-        @Override
-        public int getCount() { return items.size(); }
-
-        @Override
-        public Object getItem(int i) { return items.get(i); }
-
-        @Override
-        public long getItemId(int i) { return items.get(i).getId(); }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(FavoriteActivity.this)
-                        .inflate(R.layout.favorite_item, parent, false);
-            }
-
-            TextView tvName = convertView.findViewById(R.id.textPlantName);
-            Button btnRemove = convertView.findViewById(R.id.buttonRemove);
-
-            Plant plant = items.get(position);
-            tvName.setText(plant.getName());
-
-            btnRemove.setOnClickListener(v -> {
-                removeUseCase.execute(String.valueOf(plant.getId()));
-                viewModel.loadFromDatabase();
-            });
-
-            return convertView;
-        }
     }
 }

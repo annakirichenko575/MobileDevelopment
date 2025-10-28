@@ -17,14 +17,12 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.List;
 
 import ru.mirea.kirichenkoal.lesson9.R;
-import ru.mirea.kirichenkoal.lesson9.data.repository.PlantRepositoryImpl;
-import ru.mirea.kirichenkoal.lesson9.domain.models.Plant;
-import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.PlantViewModel;
-import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.PlantViewModelFactory;
+import ru.mirea.kirichenkoal.lesson9.domain.models.PlantItem;
+import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.SearchViewModel;
 
 /**
  * Экран поиска растений.
- * MVVM — взаимодействует с ViewModel через LiveData.
+ * Работает через общий MockPlantRepository.
  */
 public class SearchActivity extends AppCompatActivity {
 
@@ -34,10 +32,8 @@ public class SearchActivity extends AppCompatActivity {
     private RecyclerView recyclerViewResults;
     private View tvResultsTitle, tvNoResults;
 
-    private PlantAdapter adapter;
-
-    // ViewModel
-    private PlantViewModel viewModel;
+    private PlantListAdapter adapter;
+    private SearchViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +41,10 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
 
         initViews();
+        setupRecyclerView();
         setupViewModel();
         setupClickListeners();
-        setupBottomNavigation(); // нижнее меню
+        setupBottomNavigation();
     }
 
     private void initViews() {
@@ -57,27 +54,32 @@ public class SearchActivity extends AppCompatActivity {
         recyclerViewResults = findViewById(R.id.recyclerViewResults);
         tvResultsTitle = findViewById(R.id.tvResultsTitle);
         tvNoResults = findViewById(R.id.tvNoResults);
-
-        recyclerViewResults.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new PlantAdapter();
-        recyclerViewResults.setAdapter(adapter);
     }
 
-    /**
-     * Настройка ViewModel и LiveData
-     */
-    private void setupViewModel() {
-        PlantRepositoryImpl repo = new PlantRepositoryImpl(this);
-        PlantViewModelFactory factory = new PlantViewModelFactory(repo);
-        viewModel = new ViewModelProvider(this, factory).get(PlantViewModel.class);
+    private void setupRecyclerView() {
+        recyclerViewResults.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new PlantListAdapter();
+        recyclerViewResults.setAdapter(adapter);
 
-        // Подписка на LiveData
-        viewModel.getPlants().observe(this, plants -> {
+        adapter.setOnFavoriteClickListener(plant -> {
+            Toast.makeText(this,
+                    (plant.isFavorite() ? "Удалено из избранного" : "Добавлено в избранное"),
+                    Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void setupViewModel() {
+        viewModel = new ViewModelProvider(this).get(SearchViewModel.class);
+
+        viewModel.getResults().observe(this, plants -> {
             setLoading(false);
-            if (plants != null) {
-                displayResults(plants);
-            } else {
+            if (plants == null) {
+                hideResults();
+            } else if (plants.isEmpty()) {
                 showNoResults();
+            } else {
+                showResults();
+                adapter.setPlants(plants);
             }
         });
     }
@@ -86,9 +88,6 @@ public class SearchActivity extends AppCompatActivity {
         btnSearch.setOnClickListener(v -> performSearch());
     }
 
-    /**
-     * Поиск через ViewModel
-     */
     private void performSearch() {
         String query = etSearch.getText().toString().trim();
         if (query.isEmpty()) {
@@ -98,22 +97,14 @@ public class SearchActivity extends AppCompatActivity {
 
         setLoading(true);
         hideResults();
-        viewModel.loadFromNetwork(query);
+
+        viewModel.search(query);
     }
 
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         btnSearch.setEnabled(!loading);
         btnSearch.setText(loading ? "Поиск..." : "Найти");
-    }
-
-    private void displayResults(List<Plant> plants) {
-        if (plants.isEmpty()) {
-            showNoResults();
-        } else {
-            showResults();
-            adapter.setPlants(plants);
-        }
     }
 
     private void showResults() {
@@ -134,9 +125,6 @@ public class SearchActivity extends AppCompatActivity {
         tvNoResults.setVisibility(View.GONE);
     }
 
-    /**
-     * Нижнее меню навигации с if-else (без switch)
-     */
     private void setupBottomNavigation() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
         bottomNavigationView.setSelectedItemId(R.id.navigation_search);
@@ -146,17 +134,20 @@ public class SearchActivity extends AppCompatActivity {
 
             if (id == R.id.navigation_home) {
                 startActivity(new Intent(this, MainActivity.class));
+                overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.navigation_search) {
-                return true; // уже здесь
+                return true;
             } else if (id == R.id.navigation_analyze) {
                 Toast.makeText(this, "Функция анализа листа пока не реализована", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (id == R.id.navigation_favorite) {
                 startActivity(new Intent(this, FavoriteActivity.class));
+                overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.navigation_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
                 return true;
             }
 

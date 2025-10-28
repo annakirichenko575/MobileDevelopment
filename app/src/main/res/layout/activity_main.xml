@@ -1,236 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    android:fitsSystemWindows="true">
+    tools:context=".presentation.MainActivity">
 
-    <!-- AppBar с заголовком -->
-    <com.google.android.material.appbar.AppBarLayout
+    <!-- Заголовок -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbarMain"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:background="@color/white"
-        android:elevation="4dp">
+        app:title="Все растения"
+        app:titleTextColor="@color/black"
+        app:titleCentered="true"
+        android:elevation="4dp" />
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="PlantCare"
-            app:titleTextColor="@color/black"
-            app:navigationIcon="@drawable/ic_plant_logo" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!-- Основной контент -->
-    <com.google.android.material.card.MaterialCardView
+    <!-- Список -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewPlants"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
-        app:cardBackgroundColor="@color/white"
-        android:layout_marginTop="80dp">
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:paddingBottom="80dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        tools:listitem="@layout/item_plant_card" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp">
-
-            <!-- Заголовок раздела -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Мои растения"
-                android:textColor="@color/black"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Добавьте ваше любимое растение"
-                android:textColor="@color/gray_600"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:layout_marginBottom="24dp" />
-
-            <!-- Поле ввода растения с отдельной иконкой -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
-
-                <!-- Иконка растения -->
-                <ImageView
-                    android:id="@+id/iconPlant"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_centerVertical="true"
-                    android:layout_marginStart="16dp"
-                    android:src="@drawable/ic_plant_logo"
-                    app:tint="@color/green_500" />
-
-                <!-- Поле ввода -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/iconPlant"
-                    android:layout_marginStart="8dp"
-                    app:boxBackgroundMode="outline"
-                    app:boxCornerRadiusBottomEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusTopStart="12dp"
-                    app:boxStrokeColor="@color/green_500"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editTextPlant"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Название растения"
-                        android:textColor="@color/black"
-                        android:textColorHint="@color/gray_500"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:importantForAutofill="yes" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-            </RelativeLayout>
-
-            <!-- Горизонтальный layout для кнопок -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="24dp">
-
-                <!-- Кнопка сохранения -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonSavePlant"
-                    android:layout_width="0dp"
-                    android:layout_height="56dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:text="Сохранить"
-                    android:textSize="14sp"
-                    app:cornerRadius="12dp"
-                    app:icon="@drawable/ic_save"
-                    app:iconGravity="textStart"
-                    app:iconPadding="4dp"
-                    app:iconTint="@color/white"
-                    android:backgroundTint="@color/green_500"
-                    style="@style/Widget.Material3.Button" />
-
-                <!-- Кнопка получения -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonGetPlant"
-                    android:layout_width="0dp"
-                    android:layout_height="56dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:text="Показать"
-                    android:textSize="14sp"
-                    app:cornerRadius="12dp"
-                    app:icon="@drawable/ic_visibility"
-                    app:iconGravity="textStart"
-                    app:iconPadding="4dp"
-                    app:iconTint="@color/white"
-                    android:backgroundTint="@color/green_500"
-                    style="@style/Widget.Material3.Button" />
-
-            </LinearLayout>
-
-            <!-- Карточка с результатом -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/green_50"
-                android:layout_marginBottom="24dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Ваше растение:"
-                        android:textColor="@color/gray_600"
-                        android:textSize="12sp"
-                        android:layout_marginBottom="4dp" />
-
-                    <TextView
-                        android:id="@+id/textViewPlant"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Здесь появится ваше растение"
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Кнопка перехода в избранное -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonFavorites"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:text="Мои избранные растения"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:cornerRadius="16dp"
-                app:icon="@drawable/ic_favorite"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp"
-                app:iconTint="@color/white"
-                android:backgroundTint="@color/green_500"
-                style="@style/Widget.Material3.Button" />
-
-            <!-- После кнопки избранного -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonSearch"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="Поиск растений"
-                android:textColor="@color/green_500"
-                android:textSize="14sp"
-                app:cornerRadius="12dp"
-                app:strokeColor="@color/green_500"
-                app:strokeWidth="1dp"
-                app:icon="@drawable/ic_search"
-                app:iconGravity="textStart"
-                app:iconPadding="4dp"
-                app:iconTint="@color/green_500"
-                android:backgroundTint="@android:color/transparent"
-                android:layout_marginTop="8dp"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Кнопка выхода -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonLogout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Выйти"
-        android:layout_gravity="end"
-        android:layout_marginTop="8dp"
-        style="@style/Widget.Material3.Button.OutlinedButton" />
-
+    <!-- Нижнее меню -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
