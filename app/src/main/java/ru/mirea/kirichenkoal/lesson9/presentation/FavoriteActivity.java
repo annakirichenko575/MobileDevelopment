@@ -16,6 +16,10 @@ import java.util.List;
 import ru.mirea.kirichenkoal.lesson9.R;
 import ru.mirea.kirichenkoal.lesson9.domain.models.PlantItem;
 import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.FavoritePlantsViewModel;
+import android.content.Intent;
+import android.widget.Toast;
+import ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthManager;
+import ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthActivity;
 
 /**
  * Экран "Избранное"
@@ -30,6 +34,13 @@ public class FavoriteActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite);
+
+        if (ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthManager.isGuest()) {
+            android.widget.Toast.makeText(this, "Войдите, чтобы просматривать избранное", android.widget.Toast.LENGTH_SHORT).show();
+            startActivity(new android.content.Intent(this, ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthActivity.class));
+            finish();
+            return;
+        }
 
         setupRecyclerView();
         setupViewModel();
@@ -71,15 +82,23 @@ public class FavoriteActivity extends AppCompatActivity {
                 startActivity(new Intent(this, MainActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
+
             } else if (id == R.id.navigation_search) {
                 startActivity(new Intent(this, SearchActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
+
             } else if (id == R.id.navigation_analyze) {
                 Toast.makeText(this, "Функция анализа листа пока не реализована", Toast.LENGTH_SHORT).show();
                 return true;
+
             } else if (id == R.id.navigation_favorite) {
-                return true; // уже здесь
+                // Уже здесь. Если гость — мягко предложим авторизоваться.
+                if (ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthManager.isGuest()) {
+                    startActivity(new Intent(this, ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthActivity.class));
+                }
+                return true;
+
             } else if (id == R.id.navigation_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 overridePendingTransition(0, 0);

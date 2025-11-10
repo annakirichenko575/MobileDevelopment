@@ -15,6 +15,7 @@ import java.util.List;
 
 import ru.mirea.kirichenkoal.lesson9.R;
 import ru.mirea.kirichenkoal.lesson9.domain.models.PlantItem;
+import ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthManager;
 
 /**
  * Адаптер для отображения списка растений
@@ -79,9 +80,21 @@ public class PlantListAdapter extends RecyclerView.Adapter<PlantListAdapter.Plan
 
         // Обработка нажатия
         holder.buttonFavorite.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onFavoriteClick(plant);
+            if (ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthManager.isGuest()) {
+                android.widget.Toast.makeText(
+                        v.getContext(),
+                        "Авторизуйтесь, чтобы добавлять в избранное",
+                        android.widget.Toast.LENGTH_SHORT
+                ).show();
+                v.getContext().startActivity(
+                        new android.content.Intent(
+                                v.getContext(),
+                                ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthActivity.class
+                        )
+                );
+                return;
             }
+            if (listener != null) listener.onFavoriteClick(plant);
         });
 
         // Обработка клика по всей карточке — открытие PlantDetailActivity

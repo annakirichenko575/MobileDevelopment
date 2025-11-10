@@ -64,9 +64,16 @@ public class LoginFragmentFixed extends Fragment {
         btnLogin.setOnClickListener(v -> attemptLogin());
 
         btnGuest.setOnClickListener(v -> {
-            Intent intent = new Intent(requireActivity(), MainActivity.class);
-            startActivity(intent);
-            requireActivity().finish();
+            com.google.firebase.auth.FirebaseAuth.getInstance()
+                    .signInAnonymously()
+                    .addOnSuccessListener(authResult -> {
+                        Toast.makeText(getContext(), "Вход как гость", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(requireActivity(), ru.mirea.kirichenkoal.lesson9.presentation.MainActivity.class));
+                        requireActivity().finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Ошибка входа гостем", Toast.LENGTH_SHORT).show();
+                    });
         });
 
         getView().findViewById(R.id.tvForgotPassword).setOnClickListener(v -> {

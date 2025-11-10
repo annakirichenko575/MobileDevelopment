@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.appbar.MaterialToolbar;
+import android.content.Intent;
 
 import ru.mirea.kirichenkoal.lesson9.R;
 import ru.mirea.kirichenkoal.lesson9.data.network.PlantInfoRepository;
@@ -18,6 +19,7 @@ import ru.mirea.kirichenkoal.lesson9.data.network.dto.PlantInfoApiModel;
 import ru.mirea.kirichenkoal.lesson9.data.repository.MockPlantRepository;
 import ru.mirea.kirichenkoal.lesson9.data.storage.PlantNoteStorage;
 import ru.mirea.kirichenkoal.lesson9.domain.models.PlantItem;
+import ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthManager;
 
 public class PlantDetailActivity extends AppCompatActivity {
 
@@ -88,14 +90,23 @@ public class PlantDetailActivity extends AppCompatActivity {
         }
 
         // Кнопка добавления заметки
-        MaterialButton btnAddNote = findViewById(R.id.buttonAddNote);
-        btnAddNote.setOnClickListener(v -> {
-            AddNoteDialog.show(this, plant.getName(), note -> {
-                noteStorage.saveNote(plant.getName(), note);
-                textNote.setVisibility(View.VISIBLE);
-                String allNotes = noteStorage.getNote(plant.getName());
-                textNote.setText(allNotes);
+        com.google.android.material.button.MaterialButton btnAddNote = findViewById(R.id.buttonAddNote);
+
+        if (ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthManager.isGuest()) {
+            btnAddNote.setText("Войти, чтобы добавить заметку");
+            btnAddNote.setOnClickListener(v -> {
+                android.widget.Toast.makeText(this, "Войдите, чтобы добавлять заметки", android.widget.Toast.LENGTH_SHORT).show();
+                startActivity(new android.content.Intent(this, ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthActivity.class));
             });
-        });
+        } else {
+            btnAddNote.setOnClickListener(v -> {
+                AddNoteDialog.show(this, plant.getName(), note -> {
+                    noteStorage.saveNote(plant.getName(), note);
+                    textNote.setVisibility(android.view.View.VISIBLE);
+                    String allNotes = noteStorage.getNote(plant.getName());
+                    textNote.setText(allNotes);
+                });
+            });
+        }
     }
 }

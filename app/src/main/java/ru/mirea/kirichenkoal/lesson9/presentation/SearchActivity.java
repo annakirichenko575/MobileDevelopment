@@ -136,15 +136,23 @@ public class SearchActivity extends AppCompatActivity {
                 startActivity(new Intent(this, MainActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
+
             } else if (id == R.id.navigation_search) {
-                return true;
+                return true; // уже здесь
+
             } else if (id == R.id.navigation_analyze) {
                 Toast.makeText(this, "Функция анализа листа пока не реализована", Toast.LENGTH_SHORT).show();
                 return true;
+
             } else if (id == R.id.navigation_favorite) {
+                if (ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthManager.isGuest()) {
+                    startActivity(new Intent(this, ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthActivity.class));
+                    return true;
+                }
                 startActivity(new Intent(this, FavoriteActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
+
             } else if (id == R.id.navigation_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 overridePendingTransition(0, 0);
