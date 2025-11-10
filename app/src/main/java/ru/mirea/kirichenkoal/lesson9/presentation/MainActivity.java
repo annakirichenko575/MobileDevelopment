@@ -3,6 +3,7 @@ package ru.mirea.kirichenkoal.lesson9.presentation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -11,10 +12,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.List;
+
 import ru.mirea.kirichenkoal.lesson9.R;
 import ru.mirea.kirichenkoal.lesson9.domain.models.PlantItem;
 import ru.mirea.kirichenkoal.lesson9.presentation.viewmodel.PlantListViewModel;
+import ru.mirea.kirichenkoal.lesson9.data.network.dto.PlantApiModel;
 
+/**
+ * Главный экран приложения — отображает растения из локального и сетевого источников.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private PlantListViewModel viewModel;
@@ -28,6 +35,24 @@ public class MainActivity extends AppCompatActivity {
         setupRecyclerView();
         setupViewModel();
         setupBottomNavigation();
+
+        // 1) Обработчик кнопки "Загрузить растения из сети"
+        Button buttonLoadNetwork = findViewById(R.id.buttonLoadFromNetwork);
+        buttonLoadNetwork.setOnClickListener(v -> {
+            viewModel.loadFromNetwork();
+            Toast.makeText(this, "Загрузка растений из сети...", Toast.LENGTH_SHORT).show();
+        });
+
+        // 2) Подписка на сетевые данные и отображение их в списке
+        viewModel.getNetworkPlants().observe(this, plants -> {
+            if (plants != null) {
+                adapter.setPlantsFromApi(plants);  // этот метод мы добавили в адаптер
+                Toast.makeText(this, "Данные получены из сети!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Ошибка загрузки из сети", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     private void setupRecyclerView() {
@@ -36,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         adapter = new PlantListAdapter();
         recyclerView.setAdapter(adapter);
 
+        // обработчик нажатий на кнопку "В избранное"
         adapter.setOnFavoriteClickListener(plant -> {
             viewModel.toggleFavorite(plant);
             Toast.makeText(this,
@@ -46,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(PlantListViewModel.class);
+        // Подписка на локальные данные (mock)
         viewModel.getPlants().observe(this, adapter::setPlants);
     }
 
@@ -78,5 +105,4 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
     }
-
 }

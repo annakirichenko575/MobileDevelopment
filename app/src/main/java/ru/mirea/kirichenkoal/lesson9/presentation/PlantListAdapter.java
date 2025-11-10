@@ -16,11 +16,15 @@ import java.util.List;
 import ru.mirea.kirichenkoal.lesson9.R;
 import ru.mirea.kirichenkoal.lesson9.domain.models.PlantItem;
 
+/**
+ * Адаптер для отображения списка растений
+ */
 public class PlantListAdapter extends RecyclerView.Adapter<PlantListAdapter.PlantViewHolder> {
 
     private final List<PlantItem> plants = new ArrayList<>();
     private OnFavoriteClickListener listener;
 
+    // Интерфейс для клика по кнопке "В избранное"
     public interface OnFavoriteClickListener {
         void onFavoriteClick(PlantItem plant);
     }
@@ -29,9 +33,12 @@ public class PlantListAdapter extends RecyclerView.Adapter<PlantListAdapter.Plan
         this.listener = listener;
     }
 
+    // Устанавливаем список растений
     public void setPlants(List<PlantItem> newPlants) {
         plants.clear();
-        plants.addAll(newPlants);
+        if (newPlants != null) {
+            plants.addAll(newPlants);
+        }
         notifyDataSetChanged();
     }
 
@@ -46,23 +53,35 @@ public class PlantListAdapter extends RecyclerView.Adapter<PlantListAdapter.Plan
     @Override
     public void onBindViewHolder(@NonNull PlantViewHolder holder, int position) {
         PlantItem plant = plants.get(position);
+
         holder.textName.setText(plant.getName());
         holder.textDescription.setText(plant.getDescription());
 
+        // Загружаем картинку по имени файла (из drawable)
         int resId = holder.itemView.getContext()
                 .getResources()
-                .getIdentifier(plant.getImageName(), "drawable",
-                        holder.itemView.getContext().getPackageName());
+                .getIdentifier(
+                        plant.getImageName(),
+                        "drawable",
+                        holder.itemView.getContext().getPackageName()
+                );
+
         if (resId != 0) {
             holder.imagePlant.setImageResource(resId);
         } else {
-            holder.imagePlant.setImageResource(R.drawable.ic_plant_logo);
+            holder.imagePlant.setImageResource(R.drawable.ic_plant_logo); // запасное изображение
         }
 
-        holder.buttonFavorite.setText(plant.isFavorite() ? "Удалить из избранного" : "В избранное");
+        // Текст на кнопке
+        holder.buttonFavorite.setText(
+                plant.isFavorite() ? "Удалить из избранного" : "В избранное"
+        );
 
+        // Обработка нажатия
         holder.buttonFavorite.setOnClickListener(v -> {
-            if (listener != null) listener.onFavoriteClick(plant);
+            if (listener != null) {
+                listener.onFavoriteClick(plant);
+            }
         });
     }
 
@@ -71,6 +90,7 @@ public class PlantListAdapter extends RecyclerView.Adapter<PlantListAdapter.Plan
         return plants.size();
     }
 
+    // === ViewHolder ===
     static class PlantViewHolder extends RecyclerView.ViewHolder {
         ImageView imagePlant;
         TextView textName;
@@ -84,5 +104,32 @@ public class PlantListAdapter extends RecyclerView.Adapter<PlantListAdapter.Plan
             textDescription = itemView.findViewById(R.id.textPlantDescription);
             buttonFavorite = itemView.findViewById(R.id.buttonFavorite);
         }
+    }
+
+    /**
+     * Загружает растения из сети и преобразует их в объекты PlantItem.
+     */
+    public void setPlantsFromApi(List<ru.mirea.kirichenkoal.lesson9.data.network.dto.PlantApiModel> apiPlants) {
+        plants.clear();
+
+        if (apiPlants != null) {
+            int idCounter = 1;
+            for (ru.mirea.kirichenkoal.lesson9.data.network.dto.PlantApiModel apiModel : apiPlants) {
+                String title = apiModel.getTitle() != null ? apiModel.getTitle() : "Без названия";
+                String desc = apiModel.getCompleted() != null && apiModel.getCompleted()
+                        ? "Растение активное" : "Растение неактивное";
+
+                // создаём объект PlantItem
+                plants.add(new ru.mirea.kirichenkoal.lesson9.domain.models.PlantItem(
+                        idCounter++,
+                        title,
+                        desc,
+                        "rose", // временная заглушка — можно позже заменить
+                        false
+                ));
+            }
+        }
+
+        notifyDataSetChanged();
     }
 }
