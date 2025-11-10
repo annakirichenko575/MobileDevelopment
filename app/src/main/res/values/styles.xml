@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 🔹 Стиль для названия параметра ("Частота полива", "Температура" и т.д.) -->
+    <style name="PlantInfoKey">
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:padding">6dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/gray_700</item>
+        <item name="android:background">@color/green_50</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <!-- 🔹 Стиль для значения параметра ("1 раз в неделю", "15–24°C" и т.д.) -->
+    <style name="PlantInfoValue">
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:padding">6dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:background">@color/gray_100</item>
+        <item name="android:gravity">center_vertical|end</item>
+    </style>
+</resources>

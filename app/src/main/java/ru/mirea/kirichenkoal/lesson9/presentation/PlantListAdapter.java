@@ -83,6 +83,16 @@ public class PlantListAdapter extends RecyclerView.Adapter<PlantListAdapter.Plan
                 listener.onFavoriteClick(plant);
             }
         });
+
+        // Обработка клика по всей карточке — открытие PlantDetailActivity
+        holder.itemView.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(
+                    v.getContext(),
+                    ru.mirea.kirichenkoal.lesson9.presentation.PlantDetailActivity.class
+            );
+            intent.putExtra("plant_index", position);
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override
@@ -124,7 +134,7 @@ public class PlantListAdapter extends RecyclerView.Adapter<PlantListAdapter.Plan
                         idCounter++,
                         title,
                         desc,
-                        "rose", // временная заглушка — можно позже заменить
+                        "rose",
                         false
                 ));
             }

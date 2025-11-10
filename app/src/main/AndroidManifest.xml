@@ -40,6 +40,8 @@
             android:name=".presentation.ProfileActivity"
             android:exported="false" />
 
+        <activity android:name=".presentation.PlantDetailActivity" />
+
     </application>
 
 </manifest>

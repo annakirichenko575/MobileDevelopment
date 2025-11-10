@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Верхняя панель с кнопкой "Назад" -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbarBack"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/white"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:title="Карточка растения"
+            app:titleCentered="true"
+            app:titleTextColor="@color/black" />
+
+        <!-- Фото -->
+        <ImageView
+            android:id="@+id/imagePlant"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Фото растения"
+            android:background="@color/green_50"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Название -->
+        <TextView
+            android:id="@+id/textPlantName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Название растения"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Информация о растении -->
+        <TextView
+            android:id="@+id/textWatering"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Полив: —"
+            android:textSize="16sp"
+            android:textColor="@color/green_500"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/textTemperature"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Температура: —"
+            android:textSize="16sp"
+            android:textColor="@color/gray_700"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/textHumidity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Влажность: —"
+            android:textSize="16sp"
+            android:textColor="@color/gray_700"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Кнопка добавления заметки -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonAddNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Добавить заметку"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/green_500"
+            app:cornerRadius="12dp"
+            app:icon="@drawable/ic_edit"
+            app:iconTint="@android:color/white"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp" />
+
+        <!-- Заметка -->
+        <TextView
+            android:id="@+id/textNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/black"
+            android:text="Заметка отсутствует"
+            android:visibility="gone"
+            android:scrollbars="vertical" />
+    </LinearLayout>
+</ScrollView>
