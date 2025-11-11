@@ -20,6 +20,6 @@
         android:id="@+id/mainActivity"
         android:name="ru.mirea.kirichenkoal.lesson9.presentation.MainActivity"
         android:label="MainActivity"
-        tools:layout="@layout/activity_main" />
+        tools:layout="@layout/activity_host" />
 
 </navigation>
