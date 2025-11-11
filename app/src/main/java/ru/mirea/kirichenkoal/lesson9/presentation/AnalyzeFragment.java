@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Intent;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -28,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.mirea.kirichenkoal.lesson9.R;
+import ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthActivity;
+import ru.mirea.kirichenkoal.lesson9.presentation.auth.AuthManager;
 
 public class AnalyzeFragment extends Fragment {
 
@@ -57,6 +60,18 @@ public class AnalyzeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // 🔒 Проверка: если пользователь — гость, не пускаем дальше
+        if (AuthManager.isGuest()) {
+            Toast.makeText(requireContext(),
+                    "Авторизуйтесь, чтобы использовать анализ изображения",
+                    Toast.LENGTH_LONG).show();
+
+            // Переход на экран авторизации
+            startActivity(new Intent(requireContext(), AuthActivity.class));
+            requireActivity().finish();
+            return;
+        }
 
         imageView = view.findViewById(R.id.imageView);
         textResult = view.findViewById(R.id.textResult);
