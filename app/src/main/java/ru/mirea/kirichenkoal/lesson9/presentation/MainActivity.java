@@ -36,8 +36,7 @@ public class MainActivity extends AppCompatActivity {
                 switchTo(TAG_SEARCH, new SearchFragment(), true);
                 return true;
             } else if (id == R.id.navigation_analyze) {
-                // пока «заглушка»
-                android.widget.Toast.makeText(this, "Функция анализа листа пока не реализована", android.widget.Toast.LENGTH_SHORT).show();
+                switchTo("TAG_ANALYZE", new AnalyzeFragment(), true);
                 return true;
             } else if (id == R.id.navigation_favorite) {
                 if (AuthManager.isGuest()) {
