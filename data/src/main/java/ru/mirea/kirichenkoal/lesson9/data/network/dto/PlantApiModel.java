@@ -16,8 +16,13 @@ public class PlantApiModel {
     @SerializedName("completed")
     private Boolean completed;
 
+    @SerializedName("imageUrl")
+    private String imageUrl;
+
     public Integer getUserId() { return userId; }
     public Integer getId() { return id; }
     public String getTitle() { return title; }
     public Boolean getCompleted() { return completed; }
+
+    public String getImageUrl() { return imageUrl; }
 }
